@@ -1,7 +1,7 @@
 [project]
 name = "modlab"
 version = "0.1.0"
-description = "Add your description here"
+description = "Multidimensional Operational Dependency Lab — a framework for modelling and analysing critical infrastructure interdependencies"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
