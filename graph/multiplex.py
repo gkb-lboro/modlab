@@ -58,6 +58,14 @@ class MultiplexGraph:
             raise ValueError(f"`{node_a}` node does not exist in `{layer_a}` layer")
         if node_b not in self.layers[layer_b]:
             raise ValueError(f"`{node_b}` node does not exist in `{layer_b}` layer")
+        if isinstance(direction, EdgeDirection):
+            validated_direction = direction
+        elif isinstance(direction, str):
+            validated_direction = EdgeDirection(direction)
+        else:
+            raise ValueError(
+                f"direction must be an EdgeDirection or string, got {type(direction)}"
+            )
         # Using a dict to store interdependencies to allow for duplicate interdependencies between the same nodes and layers aa this may happen in real world infra for resilience purposes. If we used a set, we would lose this information.
         self.interdependencies.append(
             {
@@ -66,6 +74,38 @@ class MultiplexGraph:
                 "node_b": node_b,
                 "layer_b": layer_b,
                 "weight": weight,
-                "direction": EdgeDirection(direction),
+                "direction": validated_direction,
             }
         )
+
+    def get_layer(self, name):
+        """
+        Get a layer by name.
+        Args:
+            name (str): The name of the layer.
+        Returns:
+            networkx.Graph: The graph representing the layer.
+        Raises:
+            ValueError: If the layer does not exist.
+        """
+        if name not in self.layers:
+            raise ValueError(f"`{name}` layer does not exist")
+        return self.layers[name]
+
+    def summary(self):
+        """
+        Get a summary of the multiplex graph.
+        Returns:
+            dict: A summary of the multiplex graph, including the number of layers, the number of nodes and edges in each layer, and the number of interdependencies.
+        """
+        summary = {
+            "num_layers": len(self.layers),
+            "layers": {},
+            "num_interdependencies": len(self.interdependencies),
+        }
+        for layer_name, graph in self.layers.items():
+            summary["layers"][layer_name] = {
+                "num_nodes": graph.number_of_nodes(),
+                "num_edges": graph.number_of_edges(),
+            }
+        return summary
